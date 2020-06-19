@@ -122,16 +122,118 @@ order by cost desc
 Export the country club data from PHPMyAdmin, and connect to a local SQLite instance from Jupyter notebook 
 for the following questions.  
 
+
+import sqlite3
+from sqlite3 import Error
+ 
+def create_connection(db_file):
+    """ create a database connection to the SQLite database
+        specified by the db_file
+    :param db_file: database file
+    :return: Connection object or None
+    """
+    conn = None
+    try:
+        conn = sqlite3.connect(db_file)
+        print(sqlite3.version)
+    except Error as e:
+        print(e)
+ 
+    return conn
+ 
+def select_all_tasks(conn):
+    """
+    Query all rows in the tasks table
+    :param conn: the Connection object
+    :return:
+    """
+    cur = conn.cursor()
+    
+    query1 = """
+        SELECT *
+        FROM FACILITIES
+        """
+    cur.execute(query1)
+ 
+    rows = cur.fetchall()
+ 
+    for row in rows:
+        print(row)
+
+
+def main():
+    database = "sqlite_db_pythonsqlite.db"
+ 
+    # create a database connection
+    conn = create_connection(database)
+    with conn: 
+        print("2. Query all tasks")
+        select_all_tasks(conn)
+ 
+ 
+if __name__ == '__main__':
+    main()
+
+
+
+
+
 QUESTIONS:
 /* Q10: Produce a list of facilities with a total revenue less than 1000.
 The output of facility name and total revenue, sorted by revenue. Remember
 that there's a different cost for guests and members! */
+conn = sqlite3.connect("sqlite_db_pythonsqlite.db")
+cur = conn.cursor()
+query1 = """
+        SELECT  name,totalrevenue as p
+        from (select name,sum(case when m.memid=0 then guestcost*slots
+        else membercost*slots end) as totalrevenue
+        from members m
+        inner join bookings b  on m.memid=b.memid 
+        inner join facilities f on b.facid=f.facid
+        group by f.name) as k
+        where totalrevenue<1000
+        order by totalrevenue desc
+        """
+cur.execute(query1)
+rows = cur.fetchall()
+rows
+
+
 
 /* Q11: Produce a report of members and who recommended them in alphabetic surname,firstname order */
 
+query1 = """
+        SELECT surname, firstname,recommendedby
+        FROM members
+        where memid !=0
+        order by surname, firstname
+        """
+cur.execute(query1)
+rows = cur.fetchall()
+rows
 
 /* Q12: Find the facilities with their usage by member, but not guests */
-
+query1 = """
+        SELECT distinct name
+        from (select name,m.memid from members m
+        inner join bookings b  on m.memid=b.memid 
+        inner join facilities f on b.facid=f.facid
+        where not m.memid=0) as k
+        """
+cur.execute(query1)
+rows = cur.fetchall()
+rows
 
 /* Q13: Find the facilities usage by month, but not guests */
-
+query1 = """
+        select distinct name, strftime('%m', starttime) as t from members m
+        inner join bookings b  on m.memid=b.memid 
+        inner join facilities f on b.facid=f.facid
+        where not m.memid=0
+        order by t,name
+        
+        """
+cur.execute(query1)
+rows = cur.fetchall()
+rows
