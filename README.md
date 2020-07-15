@@ -1,6 +1,6 @@
 # springboard-datascience
 
-## Capstone 1: Predicting Covid-19 confirmed cases using google mobility data
+* Capstone 1: Predicting Covid-19 confirmed cases using google mobility data
 
 Visualized the change of the rate of mobility in United States from Jan to May 2020 and performed the regression analysis to prove the effectiveness of mobility on spreading the virus using Python
 
